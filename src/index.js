@@ -1,4 +1,5 @@
 import { GraphQLServer } from 'graphql-yoga'
+import { fieldsConflictMessage } from 'graphql/validation/rules/OverlappingFieldsCanBeMerged'
 
 // Scalar types - String, Boolean, Int, Float, ID
 
@@ -47,11 +48,41 @@ const posts = [
   },
 ]
 
+const comments = [
+  {
+    id: '22',
+    text: 'such a fucking good post oh em geeeeee!!! more more more!!!!',
+    author: '3',
+  },
+  {
+    id: '23',
+    text: 'im super offended by your existence...',
+    author: '2',
+  },
+  {
+    id: '24',
+    text: 'graphql gets me so hot.',
+    author: '1',
+  },
+  {
+    id: '25',
+    text:
+      'great post! check out my profile to learn more about investing in timeshares!',
+    author: '2',
+  },
+]
+
+// 1.
+// 2.
+// 3.
+// 4.
+
 // Type definitions (schema)
 const typeDefs = `
     type Query {
         users(query: String): [User!]!
         posts(query: String): [Post!]!
+        comments(query: String): [Comment!]!
         me: User!
         post: Post!
     }
@@ -62,6 +93,7 @@ const typeDefs = `
         email: String!
         age: Int
         posts: [Post]!
+        comments: [Comment]!
     }
 
     type Post {
@@ -70,6 +102,12 @@ const typeDefs = `
         body: String!
         published: Boolean!
         author: User!
+    }
+
+    type Comment {
+      id: ID!
+      text: String!
+      author: User!
     }
 `
 
@@ -100,6 +138,11 @@ const resolvers = {
         return isTitleMatch || isBodyMatch
       })
     },
+    comments(parent, args, ctx, info) {
+      if (!args.query) {
+        return comments
+      }
+    },
   },
   Post: {
     author(parent, args, ctx, info) {
@@ -109,6 +152,14 @@ const resolvers = {
   User: {
     posts(parent, args, ctx, info) {
       return posts.filter(post => post.author === parent.id)
+    },
+    comments(parent, args, ctx, info) {
+      return comments.filter(comment => comment.author === parent.id)
+    },
+  },
+  Comment: {
+    author(parent, args, ctx, info) {
+      return users.find(user => user.id === parent.author)
     },
   },
 }
