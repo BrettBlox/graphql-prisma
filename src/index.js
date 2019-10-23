@@ -1,5 +1,5 @@
 import { GraphQLServer } from 'graphql-yoga'
-import { fieldsConflictMessage } from 'graphql/validation/rules/OverlappingFieldsCanBeMerged'
+import uuid from 'uuidv4'
 
 // Scalar types - String, Boolean, Int, Float, ID
 
@@ -42,7 +42,8 @@ const posts = [
   {
     id: '12',
     title: 'Programming Music',
-    body: '',
+    body:
+      'Here is a list of my favorite songs to listen to while coding and crying.',
     published: false,
     author: '3',
   },
@@ -84,6 +85,10 @@ const typeDefs = `
         comments(query: String): [Comment!]!
         me: User!
         post: Post!
+    }
+
+    type Mutation {
+      createUser(name: String!, email: String!, age: Int): User! 
     }
 
     type User {
@@ -143,6 +148,25 @@ const resolvers = {
       if (!args.query) {
         return comments
       }
+    },
+  },
+  Mutation: {
+    createUser(parent, args, ctx, info) {
+      const emailTaken = users.some(user => user.email === args.email)
+
+      if (emailTaken) {
+        throw new Error('Email taken.')
+      }
+
+      const user = {
+        id: uuid(),
+        name: args.name,
+        email: args.email,
+        age: args.age,
+      }
+
+      users.push(user)
+      return user
     },
   },
   Post: {
