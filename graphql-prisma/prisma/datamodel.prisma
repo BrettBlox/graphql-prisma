@@ -17,3 +17,12 @@ type Post {
   createdAt: DateTime! @createdAt
   updatedAt: DateTime! @updatedAt
 }
+
+type Comment {
+  id: ID! @id
+  text: String!
+  author: User!
+  post: Post
+  createdAt: DateTime! @createdAt
+  updatedAt: DateTime! @updatedAt
+}
