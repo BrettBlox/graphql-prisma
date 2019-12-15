@@ -37,8 +37,7 @@ const posts = [
   {
     id: '12',
     title: 'Programming Music',
-    body:
-      'Here is a list of my favorite songs to listen to while coding and crying.',
+    body: 'Here is a list of my favorite songs to listen to while coding and crying.',
     published: false,
     author: '3',
   },
@@ -65,8 +64,7 @@ const comments = [
   },
   {
     id: '25',
-    text:
-      'great post! check out my profile to learn more about investing in timeshares!',
+    text: 'great post! check out my profile to learn more about investing in timeshares!',
     author: '2',
     post: '10',
   },
