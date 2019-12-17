@@ -7,59 +7,66 @@ const prisma = new Prisma({
 
 // prisma.query prisma.mutation prisma.subscription prisma.exists
 
-// prisma.query.users(null, '{ id name posts { id title } }').then(data => {
-//   console.log(JSON.stringify(data, undefined, 2))
-// })
+const createPostForUser = async (authorId, data) => {
+  const userExists = await prisma.exists.User({ id: authorId })
 
-// prisma.query.comments(null, '{ id text author { id name } }').then(data => {
-//   console.log(JSON.stringify(data, undefined, 2))
-// })
+  if (!userExists) {
+    throw new Error('User not found')
+  }
 
-// prisma.mutation
-//   .createPost(
-//     {
-//       data: {
-//         title: 'GraphQL 101',
-//         body: '',
-//         published: false,
-//         author: {
-//           connect: {
-//             id: 'ck386l4i200ce0799kyjsnq37',
-//           },
-//         },
-//       },
-//     },
-//     '{ id title body published }'
-//   )
-//   .then(data => {
-//     console.log(data)
-//     return prisma.query.users(null, '{ id name posts { id title } }')
-//   })
-//   .then(data => {
-//     console.log(JSON.stringify(data, undefined, 2))
-//   })
-
-//
-// Goal: Mess around with mutations
-//
-// 1. Update the newly created post changing it's body and marking it as published
-// 2. Fetch all posts (id, title, body, published) and print them to the console
-// 3. View the list of posts and confirm that post did have it body and published values updated
-
-prisma.mutation
-  .updatePost(
+  const post = await prisma.mutation.createPost(
     {
-      where: {
-        id: 'ck44xjrai00250732vu6m5f57',
-      },
       data: {
-        body: 'This is how to get started with Graphql...',
-        published: true,
+        ...data,
+        author: {
+          connect: {
+            id: authorId,
+          },
+        },
       },
     },
-    '{ id }'
+    '{ author { id name email posts { id title published } } }'
   )
-  .then(data => prisma.query.posts(null, '{ id title body published }'))
-  .then(data => {
-    console.log(data)
-  })
+
+  return post.author
+}
+
+// createPostForUser('ck357pv4800710899zlixv1ym', {
+//   title: 'Great books to read',
+//   body: 'I Dont Want to Talk About It',
+//   published: true,
+// })
+//   .then(user => {
+//     console.log(JSON.stringify(user, undefined, 2))
+//   })
+//   .catch(error => {
+//     console.log(error.message)
+//   })
+
+const updatePostForUser = async (postId, data) => {
+  const postExists = await prisma.exists.Post({ id: postId })
+
+  if (!postExists) {
+    throw new Error('Post not found')
+  }
+
+  const post = await prisma.mutation.updatePost(
+    {
+      where: {
+        id: postId,
+      },
+      data,
+    },
+    '{ author { id name email posts { id title published } } }'
+  )
+
+  return post.author
+}
+
+// updatePostForUser('ck49c1heb005f0732jq2bgll2', { title: 'How to do stuff', published: true })
+//   .then(user => {
+//     console.log(JSON.stringify(user, undefined, 2))
+//   })
+//   .catch(error => {
+//     console.log(error.message)
+//   })
